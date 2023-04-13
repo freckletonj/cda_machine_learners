@@ -10,7 +10,9 @@ from transformers import pipeline
 @celery_app.task
 def sentiment_analysis_task(prompt: str):
     model = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
-    return f'`[Text Classification]` {model(prompt)}'
+    output = model(prompt)
+    formatted_output = f'**Sentiment Analysis**\n\nPrompt:\n> {prompt}\n\nLabel: **{output[0]["label"]}**\nScore: **{output[0]["score"]}**'
+    return formatted_output
 
 
 @add_async_command
@@ -34,7 +36,9 @@ async def sentiment_analysis(ctx, prompt: str):
 @celery_app.task
 def text_generation_task(prompt: str):
     model = pipeline('text-generation', model='gpt2')
-    return f'`[Text Generation]` {model(prompt)}'
+    output = model(prompt)
+    formatted_output = f'**Text Generation**\n\nPrompt:\n> {prompt}\n\nOutput:\n```\n{output[0]["generated_text"]}\n```'
+    return formatted_output
 
 
 @add_async_command
