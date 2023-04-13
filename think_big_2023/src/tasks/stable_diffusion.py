@@ -39,7 +39,7 @@ def image_task(prompt: str):
 
 @add_async_command
 @discord.ext.commands.guild_only() # don't respond on DMs
-async def image_task(ctx, prompt: str):
+async def image(ctx, prompt: str):
     await ctx.defer()
     try:
         task = image_task.delay(prompt)
@@ -54,36 +54,3 @@ async def image_task(ctx, prompt: str):
         await ctx.reply(file=file, content=txt)
     except Exception as e:
         await ctx.reply(f"Image generation failed")
-
-@add_async_command
-@discord.ext.commands.guild_only() # don't respond on DMs
-async def image(ctx, prompt: str):
-    """Provide detailed text prompt for the image you want"""
-
-    # endpoints must respond in <3 sec, unless they defer first. This
-    # shows in the UI as "thinking..."
-    await ctx.defer()
-
-    print(prompt)
-
-    payload = {
-        "prompt": prompt,
-        "steps": 40,
-
-        "width": 512,
-        "height": 512,
-        # "firstpass_width": 512,
-        # "firstpass_height": 512,
-
-        "negative_prompt": "blurry",
-    }
-
-    async with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
-        r = await response.json()
-
-        for i in r['images']:
-            image = io.BytesIO(base64.b64decode(i.split(",",1)[0]))
-            file=discord.File(image, 'image.png')
-            txt = f'`/image` {prompt}'
-            await ctx.reply(file=file, content=txt)
-

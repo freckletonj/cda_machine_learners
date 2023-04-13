@@ -40,15 +40,3 @@ To stop a container that is running in the background, use the following command
 ```sh
 docker-compose down
 ```
-
-
-
-# OLD
-
-Just get a copy of the `TOKEN` and go for it!
-
-```sh
-
-TOKEN=$(cat .discord_token) python src/main.py
-
-```
