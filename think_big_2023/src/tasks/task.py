@@ -5,10 +5,10 @@ from helpers import add_async_command, process_deferred_task
 from celeryconf import celery_app
 
 
-@celery_app.task
-def delay_echo(message):
+@celery_app.task(bind=True)
+def delay_echo(self, message):
     sleep(10)
-    return f'Echo: {message}'
+    return f'{self.request.hostname} says "{message}"'
 
 
 @add_async_command

@@ -10,8 +10,8 @@ def get_session():
     return _session
 
 
-def close_session():
+async def close_session():
     global _session
     if _session is not None:
-        _session.close()
+        await _session.close()
         _session = None

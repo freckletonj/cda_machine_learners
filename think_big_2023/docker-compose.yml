@@ -38,6 +38,8 @@ services:
     command: bash -c "watchmedo auto-restart --patterns='*.py' --recursive /entrypoints/celery_worker.sh"
     volumes:
       - ./src:/app
+    environment:
+      - HOSTNAME_COMMAND='hostname -i'
     env_file: .env
     depends_on:
       - discord_bot

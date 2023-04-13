@@ -35,6 +35,15 @@ docker-compose up -d
 ```
 Remove the -d flag to run in the foreground and see logs.
 
+### Running with Multi-Threading
+To achieve multi-threading, we scale the number of celery workers we have.
+Since python is single-threaded, this is the easiest way.
+Replace `NUM_WORKERS` with the number of workers you want to run.
+A few workers short of the number of cores you have is a good starting point.
+```sh
+docker-compose up -d --scale celery_worker=NUM_WORKERS
+```
+
 ### Stopping
 To stop a container that is running in the background, use the following command:
 ```sh
