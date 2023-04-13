@@ -19,7 +19,7 @@ services:
     build:
         context: .
         dockerfile: docker/Dockerfile
-    command: bash -c "watchmedo auto-restart --wait 15 --patterns='*.py' --recursive python new_main.py"
+    command: bash -c "watchmedo auto-restart --interval 15 --patterns='*.py' --recursive python main.py"
     volumes:
       - ./src:/app
     ports:

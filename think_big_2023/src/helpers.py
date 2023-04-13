@@ -1,13 +1,31 @@
 import asyncio
-import inspect
 import sys
-from functools import wraps
-
 from bot import bot
+import aiohttp
+
+_session = None
+
+
+def get_session():
+    global _session
+    if _session is None:
+        _session = aiohttp.ClientSession()
+    return _session
+
+
+def close_session():
+    global _session
+    if _session is not None:
+        _session.close()
+        _session = None
 
 
 def export(func):
-    """Use a snippit to avoid retyping function/class names."""
+    """
+    Use a snippit to avoid retyping function/class names.
+    Automatically adds the function to the module's __all__ list.
+    This allows the function to be imported with `from module import *`.
+    """
     mod = sys.modules[func.__module__]
     if hasattr(mod, '__all__'):
         name = func.__name__
@@ -26,10 +44,11 @@ def add_async_command(func):
 
 
 async def process_deferred_task(ctx, task, interval=3):
+    """Automatically handle simple deferred tasks."""
     await ctx.defer()
     i = 0
     while not task.ready():
-        await asyncio.sleep(1)
+        await asyncio.sleep(interval)
         i += interval
         if i > 900:
             task.revoke()

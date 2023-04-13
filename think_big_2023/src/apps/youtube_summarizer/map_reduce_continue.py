@@ -1,11 +1,8 @@
-import openai
 import tiktoken
-import os
 from langchain.text_splitter import CharacterTextSplitter
 from langchain.prompts import PromptTemplate
+from apps import our_openai as openai
 
-openai.organization = os.environ.get("OPENAI_ORG", None)
-openai.api_key = os.environ.get("OPENAI_API_KEY", None)
 
 MAP_PROMPT = PromptTemplate(
     input_variables=["text"],

@@ -14,6 +14,37 @@
 
 ## Usage
 
+### Setup
+Copy the `.env_sample` file to `.env` and fill in the values.
+
+```sh
+cp .env_sample .env
+```
+
+Make sure you have Docker and Docker Compose installed.
+
+```sh
+docker-compose build
+```
+
+### Running
+
+To run the bot in the background, use the following command:
+```sh
+docker-compose up -d
+```
+Remove the -d flag to run in the foreground and see logs.
+
+### Stopping
+To stop a container that is running in the background, use the following command:
+```sh
+docker-compose down
+```
+
+
+
+# OLD
+
 Just get a copy of the `TOKEN` and go for it!
 
 ```sh

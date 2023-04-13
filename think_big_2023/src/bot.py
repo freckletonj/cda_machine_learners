@@ -1,8 +1,8 @@
-import aiohttp
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import os
+from helpers import get_session, close_session
 
 description = """
 An example bot to showcase the discord.ext.commands extension module.
@@ -23,11 +23,13 @@ async def on_ready():
     print(f'Logged in as {bot.user} (ID: {bot.user.id})')
     print('Syncing commands for tab completion...')
     await bot.tree.sync()
-    bot.session = aiohttp.ClientSession() # to allow async requests
+    bot.session = get_session() # to allow async requests
     print('done')
     print('------')
 
 
-if __name__ == '__main__':
-    bot.run(TOKEN)
+@bot.event
+async def on_disconnect():
+    print('Disconnected')
+    await close_session()
 
