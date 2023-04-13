@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 from dotenv import load_dotenv
 import os
-from helpers import get_session, close_session
+from session import get_session, close_session
 
 description = """
 An example bot to showcase the discord.ext.commands extension module.

@@ -3,7 +3,8 @@ import asyncio
 import discord
 
 from celeryconf import celery_app
-from helpers import add_async_command, process_deferred_task, get_session
+from helpers import add_async_command, process_deferred_task
+from session import get_session
 import io
 import base64
 
@@ -27,18 +28,18 @@ def image_task(prompt: str):
         "negative_prompt": "blurry",
     }
 
-    async with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
-        r = await response.json()
+    with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
+        r = response.json()
 
         for i in r['images']:
-            image = io.BytesIO(base64.b64decode(i.split(",",1)[0]))
+            image = io.BytesIO(base64.b64decode(i.split(",", 1)[0]))
             file = discord.File(image, 'image.png')
             txt = f'`/image` {prompt}'
             return txt, file
 
 
 @add_async_command
-@discord.ext.commands.guild_only() # don't respond on DMs
+@discord.ext.commands.guild_only()  # don't respond on DMs
 async def image(ctx, prompt: str):
     await ctx.defer()
     try:

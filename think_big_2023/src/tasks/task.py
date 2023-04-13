@@ -7,7 +7,7 @@ from celeryconf import celery_app
 
 @celery_app.task
 def delay_echo(message):
-    sleep(5)
+    sleep(10)
     return f'Echo: {message}'
 
 
