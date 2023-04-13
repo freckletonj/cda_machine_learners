@@ -4,3 +4,4 @@ __all__ = []
 from tasks.task import *
 from tasks.llm import *
 from tasks.stable_diffusion import *
+from tasks.youtube import *
