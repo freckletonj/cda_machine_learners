@@ -8,32 +8,22 @@ USAGE:
 '''
 
 import aiohttp
-import discord
-from discord.ext import commands
 import openai
 import os
 import random
 from transformers import pipeline
 
-TOKEN = os.getenv('TOKEN')
 if TOKEN is None:
-    raise Exception('TOKEN env var must be set to a valid Discord token.')
+    raise Exception('DISCORD_BOT_TOKEN env var must be set to a valid Discord token.')
 
 openai.api_key = os.getenv('OPENAI_API_KEY')
 if openai.api_key is None:
     raise Exception('OPENAI_API_KEY env var must be set to a valid openai api key.')
 
-description = '''An example bot to showcase the discord.ext.commands extension
-module.
-There are a number of utility commands being showcased here.'''
 
-intents = discord.Intents.default()
-intents.members = True
-intents.message_content = True
 
 # Commands can be prefixed by '?'
 # Hybrid commands (only use these, really) can be prefixed by `/` and will be tab-completed in the web UI.
-bot = commands.Bot(command_prefix='?', description=description, intents=intents)
 
 
 @bot.event
@@ -179,9 +169,3 @@ async def gpt4_chat(ctx, prompt: str):
         ],
     )
     await ctx.send(f'`[Conversation GPT4]` {completion.choices[0].message}')
-
-
-##################################################
-# Run
-
-bot.run(TOKEN)
