@@ -7,8 +7,11 @@ from helpers import add_async_command, process_deferred_task
 from session import get_session
 import io
 import base64
+import requests
+import logging
+# from os import environ
 
-url = "http://127.0.0.1:7860"
+url = 'http://127.0.0.1:7860'
 
 
 # Stable Diffusion
@@ -28,14 +31,10 @@ def image_task(prompt: str):
         "negative_prompt": "blurry",
     }
 
-    with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
-        r = response.json()
-
-        for i in r['images']:
-            image = io.BytesIO(base64.b64decode(i.split(",", 1)[0]))
-            file = discord.File(image, 'image.png')
-            txt = f'`/image` {prompt}'
-            return txt, file
+    resp = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload).json()
+    for i in resp['images']:
+        base64_image = i.split(',', 1)[0]
+        return base64_image
 
 
 @add_async_command
@@ -51,7 +50,11 @@ async def image(ctx, prompt: str):
             if i > 900:
                 await ctx.reply(f"Image generation timed out after 15 minutes")
                 return
-        txt, file = task.get()
-        await ctx.reply(file=file, content=txt)
+        base64_image = task.get()
+        image = io.BytesIO(base64.b64decode(base64_image))
+        file = discord.File(image, 'image.png')
+        content = f'**Stable Diffusion Image**\n\nPrompt:\n> {prompt}'
+        await ctx.reply(file=file, content=content)
     except Exception as e:
+        logging.error(e)
         await ctx.reply(f"Image generation failed")
