@@ -7,15 +7,18 @@ from helpers import add_async_command, process_deferred_task
 from session import get_session
 import io
 import base64
+import requests
+import logging
+# from os import environ
 
-url = "http://127.0.0.1:7860"
+url = 'http://127.0.0.1:7860'
 
 
 # Stable Diffusion
 
 
 @celery_app.task
-async def image_task(prompt: str):
+def image_task(prompt: str):
     payload = {
         "prompt": prompt,
         "steps": 40,
@@ -28,12 +31,10 @@ async def image_task(prompt: str):
         "negative_prompt": "blurry",
     }
 
-    async with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
-        r = await response.json()
-
-        for i in r['images']:
-            image = io.BytesIO(base64.b64decode(i.split(",", 1)[0]))
-            return image
+    resp = requests.post(url=f'{url}/sdapi/v1/txt2img', json=payload).json()
+    for i in resp['images']:
+        base64_image = i.split(',', 1)[0]
+        return base64_image
 
 
 @add_async_command
@@ -50,8 +51,10 @@ async def image(ctx, prompt: str):
                 await ctx.reply(f"Image generation timed out after 15 minutes")
                 return
         base64_image = task.get()
-        file = discord.File(base64_image, 'image.png')
+        image = io.BytesIO(base64.b64decode(base64_image))
+        file = discord.File(image, 'image.png')
         content = f'**Stable Diffusion Image**\n\nPrompt:\n> {prompt}'
-        await ctx.reply(file=file, content=txt)
+        await ctx.reply(file=file, content=content)
     except Exception as e:
+        logging.error(e)
         await ctx.reply(f"Image generation failed")
