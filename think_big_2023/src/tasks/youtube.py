@@ -1,7 +1,9 @@
 import asyncio
 
+from celery.exceptions import TaskRevokedError
+
 from apps.youtube_summarizer import YoutubeSummarizer
-from helpers import add_async_command
+from helpers import add_async_command, await_task, TaskFailedError
 from celeryconf import celery_app
 
 
@@ -38,27 +40,23 @@ async def youtube(ctx, url: str):
     """
     Given a YouTube url, the model will return a summary of the video.
     """
-    task = youtube_summarizer_task.delay(url)
-    await ctx.defer()
-    interval = 3
-    i = 0
-    while not task.ready():
-        await asyncio.sleep(interval)
-        i += interval
-        if i > 900:
-            task.revoke()
-            await ctx.send('Task took too long')
-            print('Task took too long')
-            return
+    ctx.defer()
+    try:
+        output = await await_task(youtube_summarizer_task.delay(url))
+    except TaskRevokedError:
+        await ctx.send('Task timed out')
+        return
+    except TaskFailedError:
+        await ctx.send('Task failed')
+        return
 
-    output = task.get()
     formatted_output = f'''
-**`[Youtube Summarizer]`**
+**[Youtube Summarizer]**
 {ctx.author.mention}
-> /youtube url:{url}
+> ```/youtube url:{url}```
 '''
     if len(output) + len(formatted_output) < 1988:
-        await ctx.send(f'{formatted_output}\n\n```{output}```')
+        await ctx.send(f'{formatted_output}\n```{output}```')
     else:
         await ctx.send(formatted_output)
         for part in split_text(output):

@@ -12,10 +12,7 @@ from transformers import pipeline
 @celery_app.task
 def sentiment_analysis_task(prompt: str):
     model = pipeline('sentiment-analysis', model='distilbert-base-uncased-finetuned-sst-2-english')
-    return model(prompt)
-    formatted_output = f'**Sentiment Analysis**\n\nPrompt:\n> {prompt}\n\nLabel: **{output[0]["label"]}**\nScore: **{output[0]["score"]}**'
-
-    return formatted_output
+    return model(prompt)[0]
 
 
 @add_async_command
@@ -41,9 +38,10 @@ async def sentiment(ctx, prompt: str):
         await ctx.send('Task failed')
         return
     formatted_response = f'''
-**`[Sentiment Analysis]`** 
 {ctx.author.mention}
-> /sentiment prompt:{prompt}
+**[Sentiment Analysis]** 
+> /sentiment prompt: {prompt}
+
 *Prediction:* {result['label']}
 *Confidence:* {result['score']:>0.4f}
 '''
@@ -84,9 +82,10 @@ async def continuation(ctx, prompt: str):
         await ctx.send('Task failed')
         return
     formatted_response = f'''
-**`[Text Continuation]`** 
 {ctx.author.mention}
+**[Text Continuation]** 
 > /continuation prompt: {prompt} 
+
 {result}
 '''
     await ctx.send(formatted_response)
@@ -109,7 +108,7 @@ def chat_task(prompt: str):
             # {'role': 'assistant', 'content': 'TODO!'},
         ],
     )
-    return str(completion.choices[0].message)
+    return str(completion.choices[0].message.content)
 
 
 @add_async_command
@@ -131,8 +130,8 @@ async def chat(ctx, prompt: str):
         return
 
     out = f'''
-**`[ChatGPT]`** 
 {ctx.author.mention}
+**[ChatGPT]** 
 > /chat prompt: {prompt}
 
 *Q:* {prompt}
