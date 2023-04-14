@@ -15,7 +15,7 @@ url = "http://127.0.0.1:7860"
 
 
 @celery_app.task
-def image_task(prompt: str):
+async def image_task(prompt: str):
     payload = {
         "prompt": prompt,
         "steps": 40,
@@ -28,14 +28,12 @@ def image_task(prompt: str):
         "negative_prompt": "blurry",
     }
 
-    with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
-        r = response.json()
+    async with get_session().post(url=f'{url}/sdapi/v1/txt2img', json=payload) as response:
+        r = await response.json()
 
         for i in r['images']:
             image = io.BytesIO(base64.b64decode(i.split(",", 1)[0]))
-            file = discord.File(image, 'image.png')
-            txt = f'`/image` {prompt}'
-            return txt, file
+            return image
 
 
 @add_async_command
@@ -51,7 +49,9 @@ async def image(ctx, prompt: str):
             if i > 900:
                 await ctx.reply(f"Image generation timed out after 15 minutes")
                 return
-        txt, file = task.get()
+        base64_image = task.get()
+        file = discord.File(base64_image, 'image.png')
+        content = f'**Stable Diffusion Image**\n\nPrompt:\n> {prompt}'
         await ctx.reply(file=file, content=txt)
     except Exception as e:
         await ctx.reply(f"Image generation failed")

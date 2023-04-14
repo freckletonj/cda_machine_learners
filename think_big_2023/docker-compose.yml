@@ -24,7 +24,6 @@ services:
       - ./src:/app
     ports:
       - 443:443
-      - 7860:7860
     env_file: .env
     networks:
       - default
