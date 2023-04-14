@@ -3,7 +3,7 @@
 A Discord Bot
 
 USAGE:
-  TOKEN=$(cat .discord_token) python src/main.py
+  OPENAI_API_KEY=$(cat .openai_token) TOKEN=$(cat .discord_token) python src/main.py
 
 '''
 from bot import bot, TOKEN

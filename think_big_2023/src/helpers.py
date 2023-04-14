@@ -1,7 +1,7 @@
 import asyncio
 import sys
 from bot import bot
-
+from celery.exceptions import TaskRevokedError
 
 def export(func):
     """
@@ -26,16 +26,38 @@ def add_async_command(func):
     return decorated_func
 
 
-async def process_deferred_task(ctx, task, interval=3):
+class TaskFailedError(Exception):
+    """Custom exception class for failed tasks."""
+    pass
+
+
+async def await_task(task, interval=3, max_wait_time=900):
     """Automatically handle simple deferred tasks."""
-    await ctx.defer()
     i = 0
     while not task.ready():
         await asyncio.sleep(interval)
         i += interval
-        if i > 900:
+        if i > max_wait_time:
             task.revoke()
-            await ctx.send('Task took too long')
             print('Task took too long')
-            return
-    await ctx.send(task.get())
+            raise TaskRevokedError("Task was revoked due to exceeding max_wait_time")
+
+    result = task.get()
+    if task.status == 'FAILURE':
+        raise TaskFailedError("Task failed")
+
+    return result
+
+
+async def process_deferred_task(ctx, task, interval=3):
+    """Automatically handle simple deferred tasks."""
+    await ctx.defer()
+    try:
+        result = await await_task(task, interval)
+    except TaskRevokedError:
+        await ctx.send('Task timed out')
+        return
+    except TaskFailedError:
+        await ctx.send('Task failed')
+        return
+    await ctx.send(result)

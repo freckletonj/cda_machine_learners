@@ -1,7 +1,7 @@
 import asyncio
 
 from apps.youtube_summarizer import YoutubeSummarizer
-from helpers import add_async_command, process_deferred_task
+from helpers import add_async_command
 from celeryconf import celery_app
 
 
@@ -26,7 +26,6 @@ def split_text(text, max_len=1990):
     return parts
 
 
-
 @celery_app.task
 def youtube_summarizer_task(url: str):
     summarizer = YoutubeSummarizer(url)
@@ -35,7 +34,7 @@ def youtube_summarizer_task(url: str):
 
 
 @add_async_command
-async def youtube_summarizer(ctx, url: str):
+async def youtube(ctx, url: str):
     """
     Given a YouTube url, the model will return a summary of the video.
     """
@@ -53,8 +52,12 @@ async def youtube_summarizer(ctx, url: str):
             return
 
     output = task.get()
-    formatted_output = f'**Youtube Summarizer**\n\nPrompt:\n> {url}'
-    if len(output) + len(formatted_output) <1989:
+    formatted_output = f'''
+**`[Youtube Summarizer]`**
+{ctx.author.mention}
+> /youtube url:{url}
+'''
+    if len(output) + len(formatted_output) < 1988:
         await ctx.send(f'{formatted_output}\n\n```{output}```')
     else:
         await ctx.send(formatted_output)
