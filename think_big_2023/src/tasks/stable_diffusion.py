@@ -1,9 +1,10 @@
 import asyncio
 
 import discord
+from celery.exceptions import TaskRevokedError
 
 from celeryconf import celery_app
-from helpers import add_async_command, process_deferred_task
+from helpers import add_async_command, process_deferred_task, TaskFailedError, await_task
 from session import get_session
 import io
 import base64
@@ -42,19 +43,15 @@ def image_task(prompt: str):
 async def image(ctx, prompt: str):
     await ctx.defer()
     try:
-        task = image_task.delay(prompt)
-        i = 0
-        while not task.ready():
-            await asyncio.sleep(1)
-            i += 1
-            if i > 900:
-                await ctx.reply(f"Image generation timed out after 15 minutes")
-                return
-        base64_image = task.get()
-        image = io.BytesIO(base64.b64decode(base64_image))
-        file = discord.File(image, 'image.png')
-        content = f'**Stable Diffusion Image**\n\nPrompt:\n> {prompt}'
-        await ctx.reply(file=file, content=content)
-    except Exception as e:
-        logging.error(e)
-        await ctx.reply(f"Image generation failed")
+        task = await await_task(image_task.delay(prompt))
+    except TaskRevokedError:
+        await ctx.send('Task timed out')
+        return
+    except TaskFailedError:
+        await ctx.send('Task failed')
+        return
+    base64_image = task.get()
+    image = io.BytesIO(base64.b64decode(base64_image))
+    file = discord.File(image, 'image.png')
+    content = f'**Stable Diffusion Image**\n\nPrompt:\n> {prompt}'
+    await ctx.reply(file=file, content=content)
