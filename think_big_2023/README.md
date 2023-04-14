@@ -44,7 +44,7 @@ One or two workers short of the number of cores you have is a good starting poin
 docker-compose up -d --scale celery_worker=NUM_WORKERS
 ```
 **WARNING:** Make sure you have enough RAM to run the number of workers you want.
-LLMs are memory intensive. You can change the allocated amount of RAM in the Docker desktop settings.
+LLMs are memory intensive. You can change the allocated amount of RAM in the Docker desk
 
 ### Stopping
 To stop a container that is running in the background, use the following command:
