@@ -7,7 +7,7 @@ from apps import our_openai as openai
 MAP_PROMPT = PromptTemplate(
     input_variables=["text"],
     template=
-    """I want to you to act as a note-taking assistant. Create a well formatted summary of the following transcript.
+    """I want to you to act as a note-taking assistant. Create a well formatted summary of this.
     
     
     "{text}"
@@ -20,7 +20,7 @@ MAP_PROMPT = PromptTemplate(
 CONTINUE_PROMPT = PromptTemplate(
     input_variables=["text", "last_response"],
     template=
-    """I want to you to act as a note-taking assistant. Create a well formatted summary of the following transcript.
+    """I want to you to act as a note-taking assistant. Create a well formatted summary of this.
     
     
     "{text}"
@@ -32,7 +32,7 @@ CONTINUE_PROMPT = PromptTemplate(
 CHAPTER_MAP_PROMPT = PromptTemplate(
     input_variables=["text", "chapter"],
     template=
-    """I want to you to act as a note-taking assistant. Create a well formatted summary of the following transcript.
+    """I want to you to act as a note-taking assistant. Create a well formatted summary of this.
     
     
     "{text}"
@@ -45,7 +45,7 @@ CHAPTER_MAP_PROMPT = PromptTemplate(
 CHAPTER_CONTINUE_PROMPT = PromptTemplate(
     input_variables=["text", "chapter", "last_response"],
     template=
-    """I want to you to act as a note-taking assistant. Create a well formatted summary of the following transcript.
+    """I want to you to act as a note-taking assistant. Create a well formatted summary of this.
     
     
     "{text}"
