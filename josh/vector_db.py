@@ -123,6 +123,7 @@ class VectorDB:
         return out
 
 # @@@@@@@@@@
+# Tests
 
 dim = 10000
 index = VectorDB(dim)
@@ -149,3 +150,5 @@ for i, v in enumerate(test_vectors):
         assert r['index'] == i*top_k + j
 
 print('done')
+
+# @@@@@@@@@@
